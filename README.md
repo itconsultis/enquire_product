@@ -1,5 +1,5 @@
-#enquire_product
-================
+#Enquire products in Drupal 7
+=============================
 
 Drupal 7 module to create enquire list of nodes. This module create 
 a button with the selected text into the content type adding it as a field. 
