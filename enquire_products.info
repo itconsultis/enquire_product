@@ -1,0 +1,10 @@
+name = Enquire products
+description = A module to enquire products into a list.
+core = 7.x
+package = IT Consultis modules
+
+files[] = includes/block.inc.php
+; Files add -> https://drupal.org/node/542202
+;files[] = enquire_product.install
+;scripts[] = ....
+;configure = admin/config/content/color_maps

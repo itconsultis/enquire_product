@@ -1,0 +1,204 @@
+<?php
+
+include_once('includes/block.inc.php');
+/**
+ * @enquire_products.module
+ * Associate the countries with the color and displaying the map with color.
+ */
+
+/**
+ * Implements hook_help.
+ *
+ * Displays help and module information.
+ *
+ * @param path 
+ *   Which path of the site we're using to display help
+ * @param arg 
+ *   Array that holds the current path as returned from arg() function
+ */
+
+function enquire_products_help($path, $arg) {
+	switch ($path) {
+	    case "admin/help#enquire_products":
+		    return '<p>' . t("Store a list of products in a cookie to ask a request.") . '</p>';
+		    break;
+  	}
+} 
+ 
+/***************************************************************
+ * Field Type API hooks
+ ***************************************************************/
+
+/**
+ * Implements hook_field_info().
+ */
+function enquire_products_field_info() {  
+  // Returning array. 
+  return array(  
+    // Which is called enquire_products.
+    'enquire_products' => array(  
+      // Name of our type will be 'Te(x/s)t field'.
+      'label' => t('Enquire button'),  
+      // Description of our type.
+      'description' => t('Display a button to enquire products.'),  
+      // Standart widget that will be dispalyed at once.
+      // after that we choose field type 
+      'default_widget' => 'button',                        
+      // Standart that will be dispayed right after we choose field type.
+      'default_formatter' => 'button_format',  
+    ) 
+  ); 
+} 
+
+/**
+ * Implements hook_field_schema().
+ */
+function enquire_products_field_schema($field) {
+    $columns = array(
+      'enquire_products' => array(
+        'type' => 'varchar',
+        'length' => 10,
+        'not null' => FALSE,
+      ),
+    );
+    
+  return array('columns' => $columns);
+}
+
+/**
+ * Implements hook_field_validate().
+ */
+function enquire_products_field_validate($obj_type, $object, $field, $instance, $langcode, &$items, &$errors) {
+  foreach($items as $delta => $item) {
+    if(isset($item['enquire_products'])) {
+      if($item['enquire_products'] != ''){
+          if($item['enquire_products'] > 11) {
+          $errors[$field['field_name']][$langcode][$delta][] = array(
+            'error' => 'enquire_products_invalid',
+          'message' => t($instance['label'] . ' must be less or equal to 10.'),
+          );
+        }
+      }
+    }
+  }
+}
+
+/**
+ * Implements hook_field_is_empty().
+ */
+function enquire_products_field_is_empty($item, $field) {
+  if (empty($item['enquire_products'])) {
+    return TRUE;
+  }
+  return FALSE;
+}
+
+
+/***********************************************************************
+ *  Field Type API: Formatter
+ **********************************************************************/
+
+/**
+* Implements hook_field_formatter_info().
+*/
+function enquire_products_field_formatter_info() {
+  $info = array(
+    'enquire_button' => array(
+      'label' => t('Enquire button format'), 
+      'field types' => array('enquire_products'),
+      'description' => t('Display a button to enquire products.'),
+    ), 
+  );
+  return $info;
+}
+
+/**
+ * Implements hook_field_formatter_view().
+ */
+function enquire_products_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
+  $element = array();
+  $settings = $display['settings'];
+
+  switch ($display['type']) {
+
+    case 'enquire_button':
+        // Common case: each value is displayed individually in a sub-element
+        // keyed by delta. The field.tpl.php template specifies the markup
+        // wrapping each value.
+        foreach ($items as $delta => $item) {
+          $enq_button = '<div class = "enquirelink">
+          <form action="" method="post">
+           <input type="hidden" name="add_to_enquire" value="'. arg(1) .'">
+           <input class="enquirebuttom" type="submit" value="' . $item['enquire_products'] . '">
+         </form></div>';
+          $element[$delta] = array('#markup' => $enq_button);
+        }
+        break;
+  }
+
+  return $element;
+}
+
+
+/**************************************************************************
+ * Field Type API: Widget
+ **************************************************************************/
+ 
+/**
+ * Implements hook_field_widget_info().
+ */
+function enquire_products_field_widget_info() {  
+  // Returning massive.
+  return array(   
+    // With enquire_products name.
+    'enquire_products' => array(  
+      // Our widget will be named enquire_products label.
+      'label' => t('Button'),  
+      // Our widget will work with a field in DB under the name enquire_products.
+      'field types' => array('enquire_products'),  
+    ), 
+  ); 
+} 
+
+/**
+ * Implements hook_field_widget_form().
+ */
+function enquire_products_field_widget_form(&$form, &$form_state, $field, $instance, $langcode, $items, $delta, $element) {
+  // Setting switch into parameters that wll work widget types that are in module.
+  switch ($instance['widget']['type']) {  
+      // If parameter case is 'enquire_products'.
+      case 'enquire_products':  
+        // Then we assign to enquire_products element an array.
+        // With the following values.
+        $element['enquire_products'] = array(  
+            // Element type 'textfield'.
+            '#type' => 'textfield',  
+            // Heading given in element settings.
+            '#title' => $element['#title'],  
+            // Widget description is given in element settings.
+            '#description' => $element['#description'], 
+            // Our widget will have standart value textfield.
+            '#default_value' => isset($items[$delta]['enquire_products']) ? $items[$delta]['enquire_products'] : NULL,  
+            // If element is required it will be indicated in settings of the very element.
+            '#required' => $element['#required'],  
+            // Element location –  
+            // If it's indicated, value should be used, if not, value is 0.
+            '#weight' => isset($element['#weight']) ? $element['#weight'] : 0, 
+            // Line that we'll need for the output.
+            '#delta' => $delta,  
+        ); 
+      break; 
+  } 
+  return $element;
+}
+
+/**
+ * Implements hook_field_widget_error().
+ */
+function enquire_products_field_widget_error($element, $error) {
+  switch ($error['error']) {
+    case 'enquire_products_invalid':
+      form_error($element['enquire_products'], $error['message']);
+    break;
+  }
+}
