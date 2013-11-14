@@ -57,7 +57,7 @@ function enquire_products_field_schema($field) {
     $columns = array(
       'enquire_products' => array(
         'type' => 'varchar',
-        'length' => 10,
+        'length' => 100,
         'not null' => FALSE,
       ),
     );
