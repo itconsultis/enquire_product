@@ -91,9 +91,18 @@ function enquire_products_render_block() {
     $nid = $node;
     $style_name = 'thumbnail';
     $node = node_load($nid); 
+
+    //$path = $node->field_product_picture['und'][0]['uri'];
     $block['content'] .= '<div class="enquireproduct">';
+
+    //$block['content'] .= '<div class="enquirepicture">';
+    //$block['content'] .= '<img  src="' . image_style_url($style_name, $path) '">';
+    //$block['content'] .= '</div>';
+
     $block['content'] .= '<div class="textenquire">';
     $block['content'] .= '<a href="'.$base_url.'/node/'. $node->nid .'">';
+    //$block['content'] .= $node->field_model['und'][0]['value'];
+    //$block['content'] .= ' - ';
     $block['content'] .= $node->title;
     $block['content'] .= '</a>';
     $block['content'] .= '</div>';
@@ -105,4 +114,32 @@ function enquire_products_render_block() {
   }
 
   return $block;
+}
+
+
+function enquire_products_render_list() {
+
+  if (!isset($_SESSION['custom_enquire'])) {
+    // init the session variable
+      $_SESSION['custom_enquire'] = array();
+  }
+
+  if (isset($_POST['add_to_enquire'])) {
+     $node = $_POST['add_to_enquire'];
+     $_SESSION['custom_enquire'][$node] = $node;
+  } 
+  elseif (isset($_POST['del_to_enquire'])) {
+    $node = $_POST['del_to_enquire']; 
+    unset($_SESSION['custom_enquire'][$node]); 
+  }
+
+  if(isset($_SESSION['custom_enquire'])) {
+    echo '<div class="enquireproduct"><ul>';
+    foreach ($_SESSION['custom_enquire'] as $node){
+        $nid = $node;
+        $node = node_load($nid); //var_dump($node); die;
+      echo '<li><a href="/node/'. $node->nid .'">'.$node->title.'</a></li>';
+    }
+    echo '</ul></div>';
+  }
 }
